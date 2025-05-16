@@ -17,7 +17,7 @@ using UnityEssentials;
 ```
 
 
-# SerializeDictionary
+# Serialize Dictionary
 Each example is immediately usable in the Unity Editor and demonstrates a different TKey/TValue combination or UI feature.
 
 
