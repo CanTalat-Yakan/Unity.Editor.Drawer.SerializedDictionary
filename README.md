@@ -17,7 +17,7 @@ using UnityEssentials;
 ```
 
 
-# SerializeDictionary<TKey, TValue>
+# SerializeDictionary
 
 ## Usage Example 
 
