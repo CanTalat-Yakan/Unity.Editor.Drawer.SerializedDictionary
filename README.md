@@ -41,7 +41,7 @@ public class InventorySystem : MonoBehaviour
     private SerializeDictionary<string, SomeEnum> _stringEnum = new();
 }
 ```
-Stores item names with integer quantities.
+Stores item names with integer, color and enum values.
 
 
 
