@@ -94,10 +94,9 @@ public class WeaponManager : MonoBehaviour
     [SerializeField]
     private SerializeDictionary<WeaponSlot, WeaponData> _equippedWeapons = new();
 }
-
-Manages weapons per slot using an enum.
 ```
 
+Manages weapons per slot using an enum.
 
 4. Serializable Class as Key
 
@@ -124,9 +123,8 @@ public class EnemySpawnSystem : MonoBehaviour
     [SerializeField]
     private SerializeDictionary<EnemyType, int> _spawnChances = new();
 }
-
-Handles spawn chances per enemy type. Requires overriding Equals and GetHashCode.
 ```
+Handles spawn chances per enemy type. Requires overriding Equals and GetHashCode.
 
 
 5. Nested Dictionary
