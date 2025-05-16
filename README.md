@@ -32,7 +32,7 @@ using UnityEssentials;
 public class InventorySystem : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<string, int> itemQuantities = new();
+    private SerializeDictionary<string, int> _itemQuantities = new();
 }
 ```
 Stores item names with integer quantities.
@@ -48,21 +48,21 @@ using UnityEssentials;
 [System.Serializable]
 public struct ItemID
 {
-    public int id;
-    public string name;
+    public int Id;
+    public string Name;
 }
 
 [System.Serializable]
 public struct ItemData
 {
-    public int maxStack;
-    public float weight;
+    public int MaxStack;
+    public float Weight;
 }
 
 public class ItemDatabase : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<ItemID, ItemData> itemDatabase = new();
+    private SerializeDictionary<ItemID, ItemData> _itemDatabase = new();
 }
 ```
 Uses custom structs as keys and values.
@@ -85,14 +85,14 @@ public enum WeaponSlot
 [CreateAssetMenu]
 public class WeaponData : ScriptableObject
 {
-    public string weaponName;
-    public int damage;
+    public string WeaponName;
+    public int Damage;
 }
 
 public class WeaponManager : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<WeaponSlot, WeaponData> equippedWeapons = new();
+    private SerializeDictionary<WeaponSlot, WeaponData> _equippedWeapons = new();
 }
 
 Manages weapons per slot using an enum.
@@ -108,8 +108,8 @@ using UnityEssentials;
 [System.Serializable]
 public class EnemyType
 {
-    public string name;
-    public int tier;
+    public string Name;
+    public int Tier;
 
     public override int GetHashCode() => name.GetHashCode() ^ tier.GetHashCode();
     public override bool Equals(object obj)
@@ -122,7 +122,7 @@ public class EnemyType
 public class EnemySpawnSystem : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<EnemyType, int> spawnChances = new();
+    private SerializeDictionary<EnemyType, int> _spawnChances = new();
 }
 
 Handles spawn chances per enemy type. Requires overriding Equals and GetHashCode.
@@ -138,7 +138,7 @@ using UnityEssentials;
 public class GameStats : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<string, SerializeDictionary<string, int>> playerStats = new();
+    private SerializeDictionary<string, SerializeDictionary<string, int>> _playerStats = new();
 }
 ```
 Keeps per-player dictionaries of stat names to stat values.
@@ -154,7 +154,7 @@ using UnityEssentials;
 public class PositionTracker : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<Vector3, string> locationTags = new();
+    private SerializeDictionary<Vector3, string> _locationTags = new();
 }
 ```
 Associates world positions with named tags.
@@ -170,7 +170,7 @@ using UnityEssentials;
 public class ObjectLinker : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<string, GameObject> namedReferences = new();
+    private SerializeDictionary<string, GameObject> _namedReferences = new();
 }
 ```
 Stores named references to scene objects.
@@ -187,7 +187,7 @@ public class WeightedDictionaryExample : MonoBehaviour
 {
     [SplitWeight(2f)]
     [SerializeField]
-    private SerializeDictionary<string, string> translations = new();
+    private SerializeDictionary<string, string> _translations = new();
 }
 ```
 Expands the key field width in the inspector using the SplitWeightAttribute.
