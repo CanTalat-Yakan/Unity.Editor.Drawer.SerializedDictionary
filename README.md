@@ -37,7 +37,6 @@ public class InventorySystem : MonoBehaviour
     private SerializeDictionary<string, int> _stringInt = new();
     [SerializeField]
     private SerializeDictionary<string, Color> _stringColor = new();
-}
     [SerializeField]
     private SerializeDictionary<string, SomeEnum> _stringEnum = new();
 }
