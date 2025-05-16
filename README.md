@@ -18,6 +18,8 @@ using UnityEssentials;
 
 
 # SerializeDictionary
+Each example is immediately usable in the Unity Editor and demonstrates a different TKey/TValue combination or UI feature.
+
 
 ## Usage Example 
 
@@ -32,7 +34,12 @@ using UnityEssentials;
 public class InventorySystem : MonoBehaviour
 {
     [SerializeField]
-    private SerializeDictionary<string, int> _itemQuantities = new();
+    private SerializeDictionary<string, int> _stringInt = new();
+    [SerializeField]
+    private SerializeDictionary<string, Color> _stringColor = new();
+}
+    [SerializeField]
+    private SerializeDictionary<string, SomeEnum> _stringEnum = new();
 }
 ```
 Stores item names with integer quantities.
@@ -189,8 +196,3 @@ public class WeightedDictionaryExample : MonoBehaviour
 }
 ```
 Expands the key field width in the inspector using the SplitWeightAttribute.
-
-
-
-Each example is immediately usable in the Unity Editor and demonstrates a different TKey/TValue combination or UI feature.
-
