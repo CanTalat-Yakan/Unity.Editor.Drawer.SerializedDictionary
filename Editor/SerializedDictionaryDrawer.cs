@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UnityEssentials
 {
-    [CustomPropertyDrawer(typeof(SerializeDictionary<,>))]
+    [CustomPropertyDrawer(typeof(SerializedDictionary<,>))]
     public class SerializeDictionaryDrawer : PropertyDrawer
     {
         private ReorderableList _list;

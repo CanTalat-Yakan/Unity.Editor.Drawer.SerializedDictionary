@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UnityEssentials
 {
     [Serializable]
-    public partial class SerializeDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
+    public partial class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         public void OnBeforeSerialize()
         {

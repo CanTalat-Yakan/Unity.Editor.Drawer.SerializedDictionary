@@ -18,7 +18,7 @@ namespace UnityEssentials
         public SplitWeightAttribute(float keyWeight = 1f) => KeyWeight = keyWeight;
     }
 
-    public partial class SerializeDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    public partial class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         [SerializeField]
         private List<SerializedKeyValuePair<TKey, TValue>> _entries = new();
