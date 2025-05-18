@@ -72,14 +72,9 @@ namespace UnityEssentials
             EditorGUI.PropertyField(keyRect, keyProperty, GUIContent.none, true);
 
             if (IsCustomSerializableClass(valueProperty))
-            {
                 // Draw all visible children inside valueRect recursively
                 DrawPropertyRecursive(valueRect, valueProperty);
-            }
-            else
-            {
-                EditorGUI.PropertyField(valueRect, valueProperty, GUIContent.none, true);
-            }
+            else EditorGUI.PropertyField(valueRect, valueProperty, GUIContent.none, true);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
