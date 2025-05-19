@@ -12,6 +12,8 @@ namespace UnityEssentials
         private SerializedProperty _entriesProperty;
         private float _keyWeight = 1;
 
+        private float _indentOffset => 16 * EditorGUI.indentLevel;
+
         private void Initialize(SerializedProperty property)
         {
             if (_list != null)
@@ -28,20 +30,8 @@ namespace UnityEssentials
                 elementHeightCallback = GetElementHeight,
                 headerHeight = 0
             };
-        }
 
-        private float GetElementHeight(int index)
-        {
-            var element = _entriesProperty.GetArrayElementAtIndex(index);
-            var keyProperty = element.FindPropertyRelative("Key");
-            var valueProperty = element.FindPropertyRelative("Value");
-
-            float spacing = 4f;
-
-            float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
-            float valueHeight = GetPropertyHeightRecursive(valueProperty);
-
-            return Mathf.Max(keyHeight, valueHeight) + spacing;
+            InspectorHook.MarkPropertyAsHandled(property.propertyPath);
         }
 
         private void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
@@ -59,18 +49,43 @@ namespace UnityEssentials
             float leftPadding = 12f;
             float rightPadding = 12f;
 
+            float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
+            float valueHeight = EditorGUI.GetPropertyHeight(valueProperty, GUIContent.none, true);
+
             float keyWidth = rect.width * keyPortion;
             float valueWidth = rect.width - keyWidth;
 
-            var keyRect = new Rect(rect.x + leftPadding, rect.y, keyWidth - spacing - leftPadding, rect.height);
-            var valueRect = new Rect(rect.x + keyWidth + spacing, rect.y, valueWidth - rightPadding - spacing, rect.height);
+            var keyRect = new Rect(rect.x + leftPadding, rect.y, keyWidth - spacing - leftPadding, keyHeight);
+            var valueRect = new Rect(rect.x + keyWidth + spacing, rect.y, valueWidth - rightPadding - spacing, valueHeight);
 
-            EditorGUI.PropertyField(keyRect, keyProperty, GUIContent.none, true);
+            InspectorHook.DrawProperty(keyRect, keyProperty, GUIContent.none, true);
 
-            if (IsCustomSerializableClass(valueProperty))
-                // Draw all visible children inside valueRect recursively
-                DrawPropertyRecursive(valueRect, valueProperty);
-            else EditorGUI.PropertyField(valueRect, valueProperty, GUIContent.none, true);
+            if (!InspectorHookUtilities.IsGenericPropertyWithChildren(valueProperty))
+                InspectorHook.DrawProperty(valueRect, valueProperty, GUIContent.none, true);
+            else if (valueProperty.NextVisible(true)) // Skip script foldout
+                InspectorHookUtilities.Iterate(valueProperty, (childProperty) =>
+                {
+                    InspectorHook.DrawProperty(valueRect, childProperty, GUIContent.none, true);
+
+                    float height = EditorGUI.GetPropertyHeight(childProperty, true);
+                    valueRect.y += height + EditorGUIUtility.standardVerticalSpacing;
+                });
+
+            InspectorHook.MarkPropertyAsHandled(element.propertyPath);
+        }
+
+        private float GetElementHeight(int index)
+        {
+            var element = _entriesProperty.GetArrayElementAtIndex(index);
+            var keyProperty = element.FindPropertyRelative("Key");
+            var valueProperty = element.FindPropertyRelative("Value");
+
+            float spacing = 4f;
+
+            float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
+            float valueHeight = GetPropertyHeightRecursive(valueProperty);
+
+            return Mathf.Max(keyHeight, valueHeight) + spacing;
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -84,11 +99,12 @@ namespace UnityEssentials
             Initialize(property);
 
             // Draw foldout with label
-            var foldoutRect = new Rect(rect.x - 3, rect.y, rect.width *10, EditorGUIUtility.singleLineHeight + 2);
+            var foldoutRect = new Rect(rect.x - 3, rect.y, rect.width, EditorGUIUtility.singleLineHeight + 2);
             property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label, true, EditorStyles.foldoutHeader);
 
             // Draw array size on the right
-            var sizeRect = new Rect(rect.x + rect.width - 48, rect.y, 48, EditorGUIUtility.singleLineHeight);
+            var intFieldWidth = 76;
+            var sizeRect = new Rect(rect.x + rect.width - _indentOffset - intFieldWidth, rect.y, _indentOffset + intFieldWidth, EditorGUIUtility.singleLineHeight);
             EditorGUI.BeginChangeCheck();
             var size = EditorGUI.DelayedIntField(sizeRect, _entriesProperty.arraySize);
             if (EditorGUI.EndChangeCheck())
@@ -96,64 +112,25 @@ namespace UnityEssentials
 
             if (property.isExpanded)
             {
+                rect.x += _indentOffset;
                 rect.y += EditorGUIUtility.singleLineHeight + 3;
+                rect.width -= _indentOffset;
                 rect.height -= EditorGUIUtility.singleLineHeight;
                 _list.DoList(rect);
             }
         }
 
-        private static bool IsCustomSerializableClass(SerializedProperty property)
-        {
-            if (property == null)
-                return false;
-
-            return property.propertyType == SerializedPropertyType.Generic
-                && property.hasVisibleChildren
-                && !property.type.StartsWith("PPtr<"); // Avoid UnityEngine.Object refs
-        }
-
-        private static void DrawPropertyRecursive(Rect rect, SerializedProperty property)
-        {
-            var prop = property.Copy();
-            var endProperty = prop.GetEndProperty();
-
-            float yOffset = rect.y;
-            int indent = EditorGUI.indentLevel;
-            EditorGUI.indentLevel++;
-
-            // Save current label width
-            float originalLabelWidth = EditorGUIUtility.labelWidth;
-
-            // Reduce label width to give more space to input fields
-            EditorGUIUtility.labelWidth = 175f; // Adjust as you like, smaller means wider input fields
-
-            bool enterChildren = true;
-            while (prop.NextVisible(enterChildren) && !SerializedProperty.EqualContents(prop, endProperty))
-            {
-                float height = EditorGUI.GetPropertyHeight(prop, true);
-                var childRect = new Rect(rect.x, yOffset, rect.width, height);
-                EditorGUI.PropertyField(childRect, prop, true);
-                yOffset += height + EditorGUIUtility.standardVerticalSpacing;
-                enterChildren = false;
-            }
-
-            // Restore original label width
-            EditorGUIUtility.labelWidth = originalLabelWidth;
-
-            EditorGUI.indentLevel = indent;
-        }
-
         private static float GetPropertyHeightRecursive(SerializedProperty property)
         {
-            var prop = property.Copy();
-            var endProperty = prop.GetEndProperty();
+            var startProperty = property.Copy();
+            var endProperty = startProperty.GetEndProperty();
 
             float totalHeight = 0f;
 
             bool enterChildren = true;
-            while (prop.NextVisible(enterChildren) && !SerializedProperty.EqualContents(prop, endProperty))
+            while (startProperty.NextVisible(enterChildren) && !SerializedProperty.EqualContents(startProperty, endProperty))
             {
-                totalHeight += EditorGUI.GetPropertyHeight(prop, true) + EditorGUIUtility.standardVerticalSpacing;
+                totalHeight += EditorGUI.GetPropertyHeight(startProperty, true) + EditorGUIUtility.standardVerticalSpacing;
                 enterChildren = false;
             }
 
