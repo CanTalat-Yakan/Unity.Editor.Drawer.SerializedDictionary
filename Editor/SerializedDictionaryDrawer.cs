@@ -19,7 +19,7 @@ namespace UnityEssentials
             if (_list != null)
                 return;
 
-            var field = GetFieldInfo(property);
+            var field = GetSerializedFieldInfo(property);
             var attribute = field?.GetCustomAttribute<SplitWeightAttribute>();
             _keyWeight = attribute?.KeyWeight ?? 1;
 
@@ -163,28 +163,27 @@ namespace UnityEssentials
             return totalHeight > 0 ? totalHeight - EditorGUIUtility.standardVerticalSpacing : totalHeight; // Remove last spacing
         }
 
-        private static FieldInfo GetFieldInfo(SerializedProperty property)
+        private static FieldInfo GetSerializedFieldInfo(SerializedProperty property)
         {
-            object obj = property.serializedObject.targetObject;
-            string[] paths = property.propertyPath.Split('.');
-            FieldInfo field = null;
-            System.Type type = obj.GetType();
+            var targetObject = property.serializedObject.targetObject;
+            var pathSegment = property.propertyPath.Split('.');
+            var fieldInfo = (FieldInfo)null;
+            var currentType = targetObject.GetType();
 
-            foreach (var path in paths)
+            foreach (var segment in pathSegment)
             {
-                if (path.StartsWith("Array.data["))
+                // Skip array data paths
+                if (segment.StartsWith("Array.data["))
                     continue;
 
-                field = type.GetField(path, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (field == null)
+                fieldInfo = currentType.GetField(segment, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (fieldInfo == null)
                     return null;
 
-                type = field.FieldType;
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                    type = type.GetGenericArguments()[0];
+                currentType = fieldInfo.FieldType;
             }
 
-            return field;
+            return fieldInfo;
         }
     }
 }
