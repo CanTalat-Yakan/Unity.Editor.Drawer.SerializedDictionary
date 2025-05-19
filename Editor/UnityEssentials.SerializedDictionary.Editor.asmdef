@@ -2,7 +2,8 @@
     "name": "UnityEssentials.SerializedDictionary.Editor",
     "rootNamespace": "UnityEssentials",
     "references": [
-        "GUID:aa09701d312bf8847977605b156e47cc"
+        "GUID:aa09701d312bf8847977605b156e47cc",
+        "GUID:9fb86f0caf7d8a8488cd8aeb21105895"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

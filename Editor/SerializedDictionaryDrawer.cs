@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -18,8 +17,7 @@ namespace UnityEssentials
             if (_list != null)
                 return;
 
-            var field = GetSerializedFieldInfo(property);
-            var attribute = field?.GetCustomAttribute<SplitWeightAttribute>();
+            InspectorHookUtilities.TryGetAttribute<SplitWeightAttribute>(property, out var attribute);
             _keyWeight = attribute?.KeyWeight ?? 1;
 
             _entriesProperty = property.FindPropertyRelative("_entries");
@@ -160,29 +158,6 @@ namespace UnityEssentials
             }
 
             return totalHeight > 0 ? totalHeight - EditorGUIUtility.standardVerticalSpacing : totalHeight; // Remove last spacing
-        }
-
-        private static FieldInfo GetSerializedFieldInfo(SerializedProperty property)
-        {
-            var targetObject = property.serializedObject.targetObject;
-            var pathSegment = property.propertyPath.Split('.');
-            var fieldInfo = (FieldInfo)null;
-            var currentType = targetObject.GetType();
-
-            foreach (var segment in pathSegment)
-            {
-                // Skip array data paths
-                if (segment.StartsWith("Array.data["))
-                    continue;
-
-                fieldInfo = currentType.GetField(segment, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (fieldInfo == null)
-                    return null;
-
-                currentType = fieldInfo.FieldType;
-            }
-
-            return fieldInfo;
         }
     }
 }
