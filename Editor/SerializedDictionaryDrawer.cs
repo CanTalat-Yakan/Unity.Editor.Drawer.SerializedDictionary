@@ -87,7 +87,7 @@ namespace UnityEssentials
             Initialize(property);
 
             // Draw foldout with label
-            var foldoutRect = new Rect(rect.x - 3, rect.y, rect.width - 48, EditorGUIUtility.singleLineHeight + 2);
+            var foldoutRect = new Rect(rect.x - 3, rect.y, rect.width *10, EditorGUIUtility.singleLineHeight + 2);
             property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label, true, EditorStyles.foldoutHeader);
 
             // Draw array size on the right
