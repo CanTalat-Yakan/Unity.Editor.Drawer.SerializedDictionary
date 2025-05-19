@@ -19,8 +19,7 @@ namespace UnityEssentials
             if (_list != null)
                 return;
 
-            var targetObject = property.serializedObject.targetObject;
-            var field = GetFieldByPath(targetObject.GetType(), property.propertyPath);
+            var field = GetFieldInfo(property);
             var attribute = field?.GetCustomAttribute<SplitWeightAttribute>();
             _keyWeight = attribute?.KeyWeight ?? 1;
 
@@ -106,25 +105,6 @@ namespace UnityEssentials
             }
         }
 
-        private static FieldInfo GetFieldByPath(System.Type type, string path)
-        {
-            var parts = path.Split('.');
-            FieldInfo field = null;
-
-            foreach (var part in parts)
-            {
-                field = type.GetField(part, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (field == null)
-                    return null;
-
-                type = field.FieldType;
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                    type = type.GetGenericArguments()[0];
-            }
-
-            return field;
-        }
-
         private static bool IsCustomSerializableClass(SerializedProperty property)
         {
             if (property == null)
@@ -181,6 +161,30 @@ namespace UnityEssentials
             }
 
             return totalHeight > 0 ? totalHeight - EditorGUIUtility.standardVerticalSpacing : totalHeight; // Remove last spacing
+        }
+
+        private static FieldInfo GetFieldInfo(SerializedProperty property)
+        {
+            object obj = property.serializedObject.targetObject;
+            string[] paths = property.propertyPath.Split('.');
+            FieldInfo field = null;
+            System.Type type = obj.GetType();
+
+            foreach (var path in paths)
+            {
+                if (path.StartsWith("Array.data["))
+                    continue;
+
+                field = type.GetField(path, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (field == null)
+                    return null;
+
+                type = field.FieldType;
+                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
+                    type = type.GetGenericArguments()[0];
+            }
+
+            return field;
         }
     }
 }
