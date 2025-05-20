@@ -60,7 +60,7 @@ namespace UnityEssentials
 
             InspectorHook.DrawProperty(keyRect, keyProperty, GUIContent.none, true);
 
-            if (!InspectorHookUtilities.IsGenericPropertyWithChildren(valueProperty))
+            if (!InspectorHookUtilities.IsGenericWithChildren(valueProperty))
                 InspectorHook.DrawProperty(valueRect, valueProperty, GUIContent.none, true);
             else if (valueProperty.NextVisible(true)) // Skip script foldout
                 InspectorHookUtilities.Iterate(valueProperty, (childProperty) =>
