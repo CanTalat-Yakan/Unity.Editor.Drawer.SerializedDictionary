@@ -34,14 +34,14 @@ namespace UnityEssentials
             InspectorHook.MarkPropertyAsHandled(property.propertyPath);
         }
 
-        private void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
+        private void DrawElement(Rect position, int index, bool isActive, bool isFocused)
         {
             var element = _entriesProperty.GetArrayElementAtIndex(index);
             var keyProperty = element.FindPropertyRelative("Key");
             var valueProperty = element.FindPropertyRelative("Value");
 
-            rect.y += 2;
-            rect.height -= 4;
+            position.y += 2;
+            position.height -= 4;
 
             float totalWeight = _keyWeight + 1f;
             float keyPortion = _keyWeight / totalWeight;
@@ -52,23 +52,23 @@ namespace UnityEssentials
             float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
             float valueHeight = EditorGUI.GetPropertyHeight(valueProperty, GUIContent.none, true);
 
-            float keyWidth = rect.width * keyPortion;
-            float valueWidth = rect.width - keyWidth;
+            float keyWidth = position.width * keyPortion;
+            float valueWidth = position.width - keyWidth;
 
-            var keyRect = new Rect(rect.x + leftPadding, rect.y, keyWidth - spacing - leftPadding, keyHeight);
-            var valueRect = new Rect(rect.x + keyWidth + spacing, rect.y, valueWidth - rightPadding - spacing, valueHeight);
+            var keyPosition = new Rect(position.x + leftPadding, position.y, keyWidth - spacing - leftPadding, keyHeight);
+            var valuePosition = new Rect(position.x + keyWidth + spacing, position.y, valueWidth - rightPadding - spacing, valueHeight);
 
-            InspectorHook.DrawProperty(keyRect, keyProperty, GUIContent.none, true);
+            InspectorHook.DrawProperty(keyPosition, keyProperty, GUIContent.none, true);
 
             if (!InspectorHookUtilities.IsGenericWithChildren(valueProperty))
-                InspectorHook.DrawProperty(valueRect, valueProperty, GUIContent.none, true);
+                InspectorHook.DrawProperty(valuePosition, valueProperty, GUIContent.none, true);
             else if (valueProperty.NextVisible(true)) // Skip script foldout
                 InspectorHookUtilities.Iterate(valueProperty, (childProperty) =>
                 {
-                    InspectorHook.DrawProperty(valueRect, childProperty, GUIContent.none, true);
+                    InspectorHook.DrawProperty(valuePosition, childProperty, GUIContent.none, true);
 
                     float height = EditorGUI.GetPropertyHeight(childProperty, true);
-                    valueRect.y += height + EditorGUIUtility.standardVerticalSpacing;
+                    valuePosition.y += height + EditorGUIUtility.standardVerticalSpacing;
                 });
 
             InspectorHook.MarkPropertyAsHandled(element.propertyPath);
@@ -94,29 +94,29 @@ namespace UnityEssentials
             return property.isExpanded ? _list.GetHeight() + 21 : EditorGUIUtility.singleLineHeight;
         }
 
-        public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             Initialize(property);
 
             // Draw foldout with label
-            var foldoutRect = new Rect(rect.x - 3, rect.y, rect.width, EditorGUIUtility.singleLineHeight + 2);
-            property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label, true, EditorStyles.foldoutHeader);
+            var foldoutPosition = new Rect(position.x - 3, position.y, position.width, EditorGUIUtility.singleLineHeight + 2);
+            property.isExpanded = EditorGUI.Foldout(foldoutPosition, property.isExpanded, label, true, EditorStyles.foldoutHeader);
 
             // Draw array size on the right
             var intFieldWidth = 76;
-            var sizeRect = new Rect(rect.x + rect.width - _indentOffset - intFieldWidth, rect.y, _indentOffset + intFieldWidth, EditorGUIUtility.singleLineHeight);
+            var intFieldPosition = new Rect(position.x + position.width - _indentOffset - intFieldWidth, position.y, _indentOffset + intFieldWidth, EditorGUIUtility.singleLineHeight);
             EditorGUI.BeginChangeCheck();
-            var size = EditorGUI.DelayedIntField(sizeRect, _entriesProperty.arraySize);
+            var size = EditorGUI.DelayedIntField(intFieldPosition, _entriesProperty.arraySize);
             if (EditorGUI.EndChangeCheck())
                 _entriesProperty.arraySize = size;
 
             if (property.isExpanded)
             {
-                rect.x += _indentOffset;
-                rect.y += EditorGUIUtility.singleLineHeight + 3;
-                rect.width -= _indentOffset;
-                rect.height -= EditorGUIUtility.singleLineHeight;
-                _list.DoList(rect);
+                position.x += _indentOffset;
+                position.y += EditorGUIUtility.singleLineHeight + 3;
+                position.width -= _indentOffset;
+                position.height -= EditorGUIUtility.singleLineHeight;
+                _list.DoList(position);
             }
         }
 
