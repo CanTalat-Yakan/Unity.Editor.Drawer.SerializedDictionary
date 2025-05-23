@@ -5,6 +5,16 @@ using UnityEngine;
 
 namespace UnityEssentials
 {
+    /// <summary>
+    /// Provides a custom property drawer for <see cref="SerializedDictionary{TKey, TValue}"/> types in the Unity
+    /// Inspector.
+    /// </summary>
+    /// <remarks>This drawer enhances the display and editing experience for serialized dictionaries in the
+    /// Unity Inspector by: <list type="bullet"> <item>Rendering dictionary entries as a reorderable list.</item>
+    /// <item>Allowing customization of the key-value split weight via the <see
+    /// cref="KeyValueSplitWeightAttribute"/>.</item> <item>Supporting nested and complex property types for both keys
+    /// and values.</item> </list> The drawer automatically handles property initialization and ensures that dictionary
+    /// entries are displayed and edited correctly.</remarks>
     [CustomPropertyDrawer(typeof(SerializedDictionary<,>))]
     public class SerializeDictionaryDrawer : PropertyDrawer
     {
@@ -14,12 +24,20 @@ namespace UnityEssentials
 
         private float _indentOffset => 16 * EditorGUI.indentLevel;
 
+        /// <summary>
+        /// Initializes the internal state and configuration of the list based on the provided serialized property.
+        /// </summary>
+        /// <remarks>This method sets up a reorderable list for the provided serialized property,
+        /// including callbacks for drawing elements and determining element height. If the list has already been
+        /// initialized, the method returns immediately without performing any further actions.</remarks>
+        /// <param name="property">The serialized property used to configure and initialize the list. This property must represent a collection
+        /// or array-like structure with relative entries.</param>
         private void Initialize(SerializedProperty property)
         {
             if (_list != null)
                 return;
 
-            InspectorHookUtilities.TryGetAttribute<SplitWeightAttribute>(property, out var attribute);
+            InspectorHookUtilities.TryGetAttribute<KeyValueSplitWeightAttribute>(property, out var attribute);
             _keyWeight = attribute?.KeyWeight ?? 1;
 
             _entriesProperty = property.FindPropertyRelative("_entries");
@@ -34,6 +52,16 @@ namespace UnityEssentials
             InspectorHook.MarkPropertyAsHandled(property.propertyPath);
         }
 
+        /// <summary>
+        /// Renders a single element in a custom inspector list.
+        /// </summary>
+        /// <remarks>This method is typically used for <see cref="ReorderableList"/> to render individual elements
+        /// of a serialized property array. It adjusts the layout dynamically based on the weights of the key and value
+        /// fields, ensuring proper spacing and alignment.</remarks>
+        /// <param name="position">The rectangle on the screen where the element should be drawn.</param>
+        /// <param name="index">The zero-based index of the element being drawn.</param>
+        /// <param name="isActive">A value indicating whether the element is currently active (e.g., selected).</param>
+        /// <param name="isFocused">A value indicating whether the element currently has focus.</param>
         private void DrawElement(Rect position, int index, bool isActive, bool isFocused)
         {
             var element = _entriesProperty.GetArrayElementAtIndex(index);
@@ -74,6 +102,16 @@ namespace UnityEssentials
             InspectorHook.MarkPropertyAsHandled(element.propertyPath);
         }
 
+        /// <summary>
+        /// Calculates the height of a UI element at the specified index, based on its key and value properties.
+        /// </summary>
+        /// <remarks> This method is typically used for <see cref="ReorderableList"/> to determine the height of individual elements
+        /// in a serialized property array. It calculates the required height by evaluating both the key and value
+        /// properties, ensuring the element is tall enough to fit the larger of the two, plus spacing for proper alignment.
+        /// </remarks>
+        /// <param name="index">The zero-based index of the element in the array.</param>
+        /// <returns>The height of the element, including spacing, as a <see cref="float"/>.  The height is determined by the
+        /// larger of the key or value property heights.</returns>
         private float GetElementHeight(int index)
         {
             var element = _entriesProperty.GetArrayElementAtIndex(index);
@@ -88,12 +126,33 @@ namespace UnityEssentials
             return Mathf.Max(keyHeight, valueHeight) + spacing;
         }
 
+        /// <summary>
+        /// Calculates the height of the property field in the inspector, accounting for whether the property is
+        /// expanded.
+        /// </summary>
+        /// <remarks>This method dynamically adjusts the height based on the expanded state of the
+        /// property. Ensure that the property is properly initialized before calling this method.</remarks>
+        /// <param name="property">The serialized property for which the height is being calculated. Must not be <see langword="null"/>.</param>
+        /// <param name="label">The label associated with the property. This is typically displayed in the inspector.</param>
+        /// <returns>The height, in pixels, required to render the property field. If the property is expanded, the height
+        /// includes the additional space for the list; otherwise, it is a single line height.</returns>
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             Initialize(property);
             return property.isExpanded ? _list.GetHeight() + 21 : EditorGUIUtility.singleLineHeight;
         }
 
+        /// <summary>
+        /// Renders a custom GUI for a serialized property, including a foldout header and an adjustable array size
+        /// field.
+        /// </summary>
+        /// <remarks>This method provides a foldout header for the property, allowing the user to expand
+        /// or collapse its contents. When expanded, the method renders a reorderable list for the property's array
+        /// elements. The array size can also be adjusted using a delayed integer field displayed to the right of the
+        /// foldout header.</remarks>
+        /// <param name="position">The rectangle on the screen to use for the property GUI.</param>
+        /// <param name="property">The serialized property to render in the custom GUI.</param>
+        /// <param name="label">The label to display alongside the property in the GUI.</param>
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             Initialize(property);
@@ -120,6 +179,17 @@ namespace UnityEssentials
             }
         }
 
+        /// <summary>
+        /// Calculates the total height required to render a serialized property and its visible child properties in the
+        /// Unity Editor.
+        /// </summary>
+        /// <remarks>This method iterates through all visible child properties of the specified <see
+        /// cref="SerializedProperty"/>  and accumulates their heights, including spacing between them. The height
+        /// calculation respects Unity's  property rendering conventions, including standard vertical spacing.</remarks>
+        /// <param name="property">The <see cref="SerializedProperty"/> for which the height is calculated. This property must be valid and
+        /// initialized.</param>
+        /// <returns>The total height, in pixels, required to render the property and its visible child properties.  If the
+        /// property has no visible children, the height of the property itself is returned.</returns>
         private static float GetPropertyHeightRecursive(SerializedProperty property)
         {
             var startProperty = property.Copy();

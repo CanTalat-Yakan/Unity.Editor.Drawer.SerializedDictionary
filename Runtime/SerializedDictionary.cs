@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace UnityEssentials
 {
+    /// <summary>
+    /// Represents a serializable key-value pair.
+    /// </summary>
+    /// <remarks>This struct is designed to be used in scenarios where key-value pairs need to be serialized,
+    /// such as when persisting data or transmitting it over a network.</remarks>
+    /// <typeparam name="TKey">The type of the key.</typeparam>
+    /// <typeparam name="TValue">The type of the value.</typeparam>
     [Serializable]
     public struct SerializedKeyValuePair<TKey, TValue>
     {
@@ -12,12 +19,29 @@ namespace UnityEssentials
         public TValue Value;
     }
 
-    public class SplitWeightAttribute : PropertyAttribute
+    /// <summary>
+    /// Specifies the relative weight of the key portion in a key-value split layout.
+    /// </summary>
+    /// <remarks>This attribute is used to adjust the proportional width of the key in a key-value pair
+    /// layout. The weight determines how much space the key occupies relative to the value.</remarks>
+    public class KeyValueSplitWeightAttribute : PropertyAttribute
     {
         public float KeyWeight = 1f;
-        public SplitWeightAttribute(float keyWeight = 1f) => KeyWeight = keyWeight;
+        public KeyValueSplitWeightAttribute(float keyWeight = 1f) => KeyWeight = keyWeight;
     }
 
+    /// <summary>
+    /// Represents a dictionary that can be serialized, supporting both key-value pair storage and serialization for use
+    /// in contexts such as Unity or other frameworks requiring serialized data.
+    /// </summary>
+    /// <remarks>This class combines the functionality of a standard <see cref="Dictionary{TKey, TValue}"/>
+    /// with serialization support by maintaining an internal list of key-value pairs. It is particularly useful in
+    /// scenarios where dictionaries need to be serialized, such as in Unity's serialization system.  The dictionary
+    /// provides all standard dictionary operations, including adding, removing, and retrieving key-value pairs, as well
+    /// as enumerating the collection. The internal serialized list ensures that the dictionary's state can be persisted
+    /// and restored during serialization.</remarks>
+    /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     public partial class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
         [SerializeField]
@@ -30,6 +54,11 @@ namespace UnityEssentials
         public int Count => _dictionary.Count;
         public bool IsReadOnly => false;
 
+        /// <summary>
+        /// Gets or sets the value associated with the specified key in the dictionary.
+        /// </summary>
+        /// <param name="key">The key whose associated value is to be retrieved or set. Cannot be <see langword="null"/>.</param>
+        /// <returns></returns>
         public TValue this[TKey key]
         {
             get => _dictionary[key];

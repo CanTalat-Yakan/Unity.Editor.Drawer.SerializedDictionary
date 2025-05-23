@@ -5,6 +5,18 @@ using UnityEngine;
 
 namespace UnityEssentials
 {
+    /// <summary>
+    /// Represents a serializable dictionary that supports serialization and deserialization of its key-value pairs.
+    /// </summary>
+    /// <remarks>This class implements <see cref="IDictionary{TKey, TValue}"/> for standard dictionary
+    /// operations and  <see cref="ISerializationCallbackReceiver"/> to handle custom serialization logic. During
+    /// serialization,  the dictionary's entries are converted into a serializable format. During deserialization, the
+    /// entries  are reconstructed into the dictionary.  Special handling is applied for default keys during
+    /// deserialization to ensure compatibility with common  key types such as <see cref="string"/>, <see cref="int"/>,
+    /// and <see cref="float"/>. If a duplicate key  is encountered, a default key is generated and used
+    /// instead.</remarks>
+    /// <typeparam name="TKey">The type of the keys in the dictionary. Keys must be unique and cannot be null.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     [Serializable]
     public partial class SerializedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
