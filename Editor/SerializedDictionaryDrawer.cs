@@ -30,8 +30,6 @@ namespace UnityEssentials
         /// <remarks>This method sets up a reorderable list for the provided serialized property,
         /// including callbacks for drawing elements and determining element height. If the list has already been
         /// initialized, the method returns immediately without performing any further actions.</remarks>
-        /// <param name="property">The serialized property used to configure and initialize the list. This property must represent a collection
-        /// or array-like structure with relative entries.</param>
         private void Initialize(SerializedProperty property)
         {
             if (_list != null)
