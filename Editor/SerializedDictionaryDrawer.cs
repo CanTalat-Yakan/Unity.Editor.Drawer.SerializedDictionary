@@ -72,8 +72,6 @@ namespace UnityEssentials
             float totalWeight = _keyWeight + 1f;
             float keyPortion = _keyWeight / totalWeight;
             float spacing = 5f;
-            float leftPadding = 12f;
-            float rightPadding = 12f;
 
             float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
             float valueHeight = EditorGUI.GetPropertyHeight(valueProperty, GUIContent.none, true);
@@ -81,8 +79,8 @@ namespace UnityEssentials
             float keyWidth = position.width * keyPortion;
             float valueWidth = position.width - keyWidth;
 
-            var keyPosition = new Rect(position.x + leftPadding, position.y, keyWidth - spacing - leftPadding, keyHeight);
-            var valuePosition = new Rect(position.x + keyWidth + spacing, position.y, valueWidth - rightPadding - spacing, valueHeight);
+            var keyPosition = new Rect(position.x, position.y, keyWidth - spacing, keyHeight);
+            var valuePosition = new Rect(position.x + keyWidth + spacing, position.y, valueWidth - spacing, valueHeight);
 
             InspectorHook.DrawProperty(keyPosition, keyProperty, GUIContent.none, true);
 
