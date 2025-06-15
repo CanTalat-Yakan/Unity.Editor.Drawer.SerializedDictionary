@@ -47,6 +47,7 @@ namespace UnityEssentials
         [SerializeField]
         private List<SerializedKeyValuePair<TKey, TValue>> _entries = new();
 
+        public Dictionary<TKey, TValue> Dictionary => _dictionary;
         private Dictionary<TKey, TValue> _dictionary = new();
 
         public ICollection<TKey> Keys => _dictionary.Keys;
@@ -78,5 +79,18 @@ namespace UnityEssentials
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) => _dictionary.TryGetValue(item.Key, out var value) && EqualityComparer<TValue>.Default.Equals(value, item.Value);
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Remove(item);
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => 
+            ((IDictionary<TKey, TValue>)Dictionary).CopyTo(array, arrayIndex);
+
+        public void CopyFrom(IDictionary<TKey, TValue> source)
+        {
+            if (source == null)
+                return;
+
+            Clear();
+            foreach (var kvp in source)
+                Add(kvp.Key, kvp.Value);
+        }
     }
 }

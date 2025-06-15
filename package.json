@@ -1,7 +1,7 @@
 {
-  "name": "com.unityessentials.serializeddictionary",
+  "name": "com.unityessentials.serializeddictionarydrawer",
   "version": "1.0.0",
-  "displayName": "UnityEssenstials SerializedDictionary",
+  "displayName": "UnityEssenstials SerializedDictionaryDrawer",
   "description": "This is a part of the UnityEssentials Ecosystem",
   "unity": "2022.1",
   "unityRelease": "",
