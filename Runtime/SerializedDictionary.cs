@@ -66,6 +66,16 @@ namespace UnityEssentials
             set => _dictionary[key] = value;
         }
 
+        public void TryAdd(TKey key, TValue value)
+        {
+            if (!_dictionary.ContainsKey(key))
+                _dictionary.Add(key, value);
+        }
+        public void TryGetValue(TKey key, TValue defaultValue, out TValue value)
+        {
+            if (!_dictionary.TryGetValue(key, out value))
+                value = defaultValue;
+        }
         public void Add(TKey key, TValue value) => _dictionary.Add(key, value);
         public bool ContainsKey(TKey key) => _dictionary.ContainsKey(key);
         public bool Remove(TKey key) => _dictionary.Remove(key);
