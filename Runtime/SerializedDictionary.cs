@@ -90,7 +90,7 @@ namespace UnityEssentials
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Remove(item);
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => 
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) =>
             ((IDictionary<TKey, TValue>)Dictionary).CopyTo(array, arrayIndex);
 
         public void CopyFrom(IDictionary<TKey, TValue> source)
@@ -100,7 +100,17 @@ namespace UnityEssentials
 
             Clear();
             foreach (var kvp in source)
-                Add(kvp.Key, kvp.Value);
+                _dictionary[kvp.Key] = kvp.Value;
+        }
+
+        public void AddFrom(IDictionary<TKey, TValue> source)
+        {
+            if (source == null)
+                return;
+
+            foreach (var kvp in source)
+                if (!_dictionary.ContainsKey(kvp.Key))
+                    _dictionary[kvp.Key] = kvp.Value;
         }
     }
 }
