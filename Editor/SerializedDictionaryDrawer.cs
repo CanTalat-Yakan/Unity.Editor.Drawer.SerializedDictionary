@@ -62,9 +62,21 @@ namespace UnityEssentials
         /// <param name="isFocused">A value indicating whether the element currently has focus.</param>
         private void DrawElement(Rect position, int index, bool isActive, bool isFocused)
         {
+            if (_entriesProperty == null || index < 0 || index >= _entriesProperty.arraySize)
+                return;
+
             var element = _entriesProperty.GetArrayElementAtIndex(index);
+            if (element == null)
+                return;
+
             var keyProperty = element.FindPropertyRelative("Key");
             var valueProperty = element.FindPropertyRelative("Value");
+
+            if (keyProperty == null || valueProperty == null)
+            {
+                EditorGUI.LabelField(position, "Invalid dictionary entry");
+                return;
+            }
 
             position.y += 2;
             position.height -= 4;
@@ -110,14 +122,20 @@ namespace UnityEssentials
         /// larger of the key or value property heights.</returns>
         private float GetElementHeight(int index)
         {
+            if (_entriesProperty == null || index < 0 || index >= _entriesProperty.arraySize)
+                return EditorGUIUtility.singleLineHeight;
+
             var element = _entriesProperty.GetArrayElementAtIndex(index);
+            if (element == null)
+                return EditorGUIUtility.singleLineHeight;
+
             var keyProperty = element.FindPropertyRelative("Key");
             var valueProperty = element.FindPropertyRelative("Value");
 
             float spacing = 4f;
 
-            float keyHeight = EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true);
-            float valueHeight = GetPropertyHeightRecursive(valueProperty);
+            float keyHeight = keyProperty != null ? EditorGUI.GetPropertyHeight(keyProperty, GUIContent.none, true) : 0f;
+            float valueHeight = valueProperty != null ? GetPropertyHeightRecursive(valueProperty) : 0f;
 
             return Mathf.Max(keyHeight, valueHeight) + spacing;
         }
@@ -188,6 +206,9 @@ namespace UnityEssentials
         /// property has no visible children, the height of the property itself is returned.</returns>
         private static float GetPropertyHeightRecursive(SerializedProperty property)
         {
+            if (property == null)
+                return EditorGUIUtility.singleLineHeight;
+
             var startProperty = property.Copy();
             var endProperty = startProperty.GetEndProperty();
 
