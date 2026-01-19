@@ -54,9 +54,9 @@ namespace UnityEssentials
         /// Invoked whenever the dictionary's contents change via this instance's APIs.
         /// </summary>
         [field: NonSerialized]
-        public event Action<TKey> OnValueChanged;
+        public event Action<TKey> OnChanged;
 
-        private void RaiseValueChanged(TKey key) => OnValueChanged?.Invoke(key);
+        private void RaiseValueChanged(TKey key) => OnChanged?.Invoke(key);
 
         public ICollection<TKey> Keys => _dictionary.Keys;
         public ICollection<TValue> Values => _dictionary.Values;
