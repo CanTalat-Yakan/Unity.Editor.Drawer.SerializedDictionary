@@ -50,6 +50,14 @@ namespace UnityEssentials
         public Dictionary<TKey, TValue> Dictionary => _dictionary;
         private Dictionary<TKey, TValue> _dictionary = new();
 
+        /// <summary>
+        /// Invoked whenever the dictionary's contents change via this instance's APIs.
+        /// </summary>
+        [field: NonSerialized]
+        public event Action<TKey> OnValueChanged;
+
+        private void RaiseValueChanged(TKey key) => OnValueChanged?.Invoke(key);
+
         public ICollection<TKey> Keys => _dictionary.Keys;
         public ICollection<TValue> Values => _dictionary.Values;
         public int Count => _dictionary.Count;
@@ -63,24 +71,45 @@ namespace UnityEssentials
         public TValue this[TKey key]
         {
             get => _dictionary[key];
-            set => _dictionary[key] = value;
+            set
+            {
+                _dictionary[key] = value;
+                RaiseValueChanged(key);
+            }
         }
 
         public void TryAdd(TKey key, TValue value)
         {
             if (!_dictionary.ContainsKey(key))
+            {
                 _dictionary.Add(key, value);
+                RaiseValueChanged(key);
+            }
         }
         public void TryGetValue(TKey key, TValue defaultValue, out TValue value)
         {
             if (!_dictionary.TryGetValue(key, out value))
                 value = defaultValue;
         }
-        public void Add(TKey key, TValue value) => _dictionary.Add(key, value);
+        public void Add(TKey key, TValue value)
+        {
+            _dictionary.Add(key, value);
+            RaiseValueChanged(key);
+        }
         public bool ContainsKey(TKey key) => _dictionary.ContainsKey(key);
-        public bool Remove(TKey key) => _dictionary.Remove(key);
+        public bool Remove(TKey key)
+        {
+            var removed = _dictionary.Remove(key);
+            if (removed) RaiseValueChanged(key);
+            return removed;
+        }
         public bool TryGetValue(TKey key, out TValue value) => _dictionary.TryGetValue(key, out value);
-        public void Clear() => _dictionary.Clear();
+        public void Clear()
+        {
+            if (_dictionary.Count == 0) return;
+            _dictionary.Clear();
+            RaiseValueChanged(default);
+        }
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => _dictionary.GetEnumerator();
 
@@ -88,7 +117,12 @@ namespace UnityEssentials
         void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) => _dictionary.TryGetValue(item.Key, out var value) && EqualityComparer<TValue>.Default.Equals(value, item.Value);
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo(array, arrayIndex);
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Remove(item);
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
+        {
+            var removed = ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).Remove(item);
+            if (removed) RaiseValueChanged(item.Key);
+            return removed;
+        }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) =>
             ((IDictionary<TKey, TValue>)Dictionary).CopyTo(array, arrayIndex);
@@ -101,6 +135,8 @@ namespace UnityEssentials
             Clear();
             foreach (var kvp in source)
                 _dictionary[kvp.Key] = kvp.Value;
+
+            RaiseValueChanged(default);
         }
 
         public void AddFrom(IDictionary<TKey, TValue> source)
@@ -108,9 +144,18 @@ namespace UnityEssentials
             if (source == null)
                 return;
 
+            var changed = false;
             foreach (var kvp in source)
-                if (!_dictionary.ContainsKey(kvp.Key))
-                    _dictionary[kvp.Key] = kvp.Value;
+            {
+                if (_dictionary.ContainsKey(kvp.Key))
+                    continue;
+
+                _dictionary[kvp.Key] = kvp.Value;
+                changed = true;
+            }
+
+            if (changed)
+                RaiseValueChanged(default);
         }
     }
 }
