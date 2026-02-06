@@ -1,7 +1,7 @@
 {
-  "name": "com.unityessentials.serializeddictionarydrawer",
-  "version": "1.0.0",
-  "displayName": "Unity Editor Drawer SerializedDictionary",
+  "name": "com.unityessentials.editor.drawer.serializeddictionary",
+  "version": "2.0.0",
+  "displayName": "Editor Drawer SerializedDictionary",
   "description": "This is a part of the UnityEssentials Ecosystem",
   "unity": "6000.0",
   "unityRelease": "",
