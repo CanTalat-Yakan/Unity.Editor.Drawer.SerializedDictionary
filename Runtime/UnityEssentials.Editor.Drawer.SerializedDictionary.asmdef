@@ -1,5 +1,5 @@
 {
-    "name": "UnityEssentials.SerializedDictionary",
+    "name": "UnityEssentials.Editor.Drawer.SerializedDictionary",
     "rootNamespace": "UnityEssentials",
     "references": [],
     "includePlatforms": [],
